@@ -4,4 +4,4 @@ version = "0.1.0"
 authors = ["Automatl <a.prokopchuk@braingines.com>"]
 
 [dependencies.audsp]
-git = "https://github.com/kykc/rust-dsp-test"
+git = "https://github.com/kykc/audsp-rs"
