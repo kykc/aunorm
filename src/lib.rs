@@ -18,9 +18,9 @@ pub trait Normalizer<TSample> {
     fn from_normal(&self, TSample) -> TSample;
 }
 
-pub trait NormalizerProvider<TSample> : Normalizer<TSample> {
+pub trait NormalizerProvider<'a, TSample> : Normalizer<TSample> {
     fn new(TSample, TSample) -> Self;
-    fn boxed(min: TSample, max: TSample) -> Box<Normalizer<TSample>>;
+    fn boxed(min: TSample, max: TSample) -> Box<Normalizer<TSample> + 'a>;
 }
 
 impl<TSample: audsp::Numeric> Normalizer<TSample> for LinearNormalizer<TSample> {
@@ -43,17 +43,17 @@ impl<TSample: audsp::Numeric> Normalizer<TSample> for LogNormalizer<TSample> {
     }
 }
 
-impl<TSample: audsp::Numeric> NormalizerProvider<TSample> for LinearNormalizer<TSample> where TSample: 'static {
+impl<'a, TSample: audsp::Numeric> NormalizerProvider<'a, TSample> for LinearNormalizer<TSample> where TSample: 'a {
     fn new(min: TSample, max: TSample) -> LinearNormalizer<TSample> {
         LinearNormalizer::<TSample>{min: min, max: max}
     }
 
-    fn boxed(min: TSample, max: TSample) -> Box<Normalizer<TSample>> {
+    fn boxed(min: TSample, max: TSample) -> Box<Normalizer<TSample> + 'a> {
         Box::new(LinearNormalizer::new(min, max))
     }
 }
 
-impl<TSample: audsp::Numeric> NormalizerProvider<TSample> for LogNormalizer<TSample> where TSample: 'static {
+impl<'a, TSample: audsp::Numeric> NormalizerProvider<'a, TSample> for LogNormalizer<TSample> where TSample: 'a {
     fn new(min: TSample, max: TSample) -> LogNormalizer<TSample> {
         let b: TSample = TSample::ln(min/max) / (TSample::zero() - TSample::one());
         let a: TSample = min;
@@ -61,7 +61,7 @@ impl<TSample: audsp::Numeric> NormalizerProvider<TSample> for LogNormalizer<TSam
         LogNormalizer{min: min, max: max, a: a, b: b}
     }
 
-    fn boxed(min: TSample, max: TSample) -> Box<Normalizer<TSample>> {
+    fn boxed(min: TSample, max: TSample) -> Box<Normalizer<TSample> + 'a> {
         Box::new(LogNormalizer::new(min, max))
     }
 }
